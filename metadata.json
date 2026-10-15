@@ -1,0 +1,6 @@
+{
+  "name": "Om Sai Adarsha Clinic",
+  "description": "Comprehensive healthcare website and administration CMS for Om Sai Adarsha Clinic, offering patient appointments, doctor directories, clinic services, and administrative management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
