@@ -14,6 +14,7 @@ export const doctorSchema = z.object({
   avatarUrl: z.string().url('Valid image URL required'),
   contactEmail: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
+  languages: z.array(z.string()).default([]),
   isAvailable: z.boolean().default(true),
   order: z.number().int().default(0),
 });

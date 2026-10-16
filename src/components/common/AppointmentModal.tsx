@@ -88,23 +88,41 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
     onClose();
   };
 
+  // Close modal on Escape key press
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        resetAndClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="booking-modal-title"
+    >
       <div className="relative bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
         <button
           onClick={resetAndClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-colors"
-          aria-label="Close Modal"
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+          aria-label="Close Appointment Modal"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {isSuccess ? (
           <div className="text-center py-6 space-y-4">
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-10 h-10" />
+              <CheckCircle2 className="w-10 h-10" aria-hidden="true" />
             </div>
-            <h3 className="text-2xl font-bold text-slate-900">Appointment Request Received!</h3>
+            <h3 id="booking-modal-title" className="text-2xl font-bold text-slate-900">
+              Appointment Request Received!
+            </h3>
             <p className="text-sm text-slate-600">
               Thank you, <strong className="text-slate-900">{patientName}</strong>. Your consultation request with{' '}
               <strong className="text-emerald-700">{selectedDoctor?.name}</strong> has been logged for{' '}
@@ -118,7 +136,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
             </div>
             <button
               onClick={resetAndClose}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-sm"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               Done
             </button>
@@ -127,10 +145,12 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
           <div>
             <div className="mb-6">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-2">
-                <Stethoscope className="w-3.5 h-3.5" />
+                <Stethoscope className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Patient Appointment</span>
               </div>
-              <h3 className="text-xl font-bold text-slate-900">Book Doctor Consultation</h3>
+              <h3 id="booking-modal-title" className="text-xl font-bold text-slate-900">
+                Book Doctor Consultation
+              </h3>
               <p className="text-xs text-slate-500 mt-1">
                 Schedule a consultation at Om Sai Adarsha Clinic. Instant confirmation.
               </p>

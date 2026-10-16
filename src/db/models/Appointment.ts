@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IAppointmentDocument extends Document {
+  appointmentNumber?: string;
   patientName: string;
   patientEmail: string;
   patientPhone: string;
@@ -21,9 +22,10 @@ export interface IAppointmentDocument extends Document {
 
 const AppointmentSchema = new Schema<IAppointmentDocument>(
   {
+    appointmentNumber: { type: String, trim: true, index: true },
     patientName: { type: String, required: true, trim: true },
-    patientEmail: { type: String, required: true, trim: true, lowercase: true },
-    patientPhone: { type: String, required: true, trim: true },
+    patientEmail: { type: String, required: true, trim: true, lowercase: true, index: true },
+    patientPhone: { type: String, required: true, trim: true, index: true },
     patientAge: { type: Number },
     patientGender: { type: String, enum: ['male', 'female', 'other'] },
     doctorId: { type: String, required: true },
@@ -43,6 +45,9 @@ const AppointmentSchema = new Schema<IAppointmentDocument>(
   },
   { timestamps: true }
 );
+
+AppointmentSchema.index({ status: 1, appointmentDate: 1 });
+AppointmentSchema.index({ patientName: 'text', patientPhone: 'text', appointmentNumber: 'text' });
 
 export const AppointmentModel: Model<IAppointmentDocument> =
   mongoose.models.Appointment || mongoose.model<IAppointmentDocument>('Appointment', AppointmentSchema);

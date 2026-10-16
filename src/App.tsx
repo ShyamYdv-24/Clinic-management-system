@@ -10,6 +10,8 @@ import { ClinicProvider } from './context/ClinicContext';
 import { Header } from './components/common/Header';
 import { Footer } from './components/common/Footer';
 import { AppointmentModal } from './components/common/AppointmentModal';
+import { FloatingWhatsApp } from './components/common/FloatingWhatsApp';
+import { NotFoundPage } from './components/common/NotFound';
 
 // Public Pages
 import { HomePage } from './pages/HomePage';
@@ -98,7 +100,7 @@ function AppRoutes() {
         pageContent = <ContactPage />;
         break;
       default:
-        pageContent = <HomePage onOpenBooking={handleOpenBooking} />;
+        pageContent = <NotFoundPage />;
         break;
     }
   }
@@ -108,6 +110,8 @@ function AppRoutes() {
       <Header onOpenBooking={() => handleOpenBooking()} />
       <main className="flex-1">{pageContent}</main>
       <Footer />
+
+      <FloatingWhatsApp />
 
       <AppointmentModal
         isOpen={bookingModalOpen}

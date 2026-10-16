@@ -5,6 +5,7 @@ export const initialClinicSettings: ClinicSettings = {
   tagline: 'Compassionate Care, Advanced Medical Excellence',
   emergencyPhone: '+91 98765 43210',
   generalPhone: '+91 80 2345 6789',
+  whatsappNumber: '+91 98765 43210',
   email: 'care@om-sai-adarsha.clinic',
   address: {
     street: '124, Temple Road, Near Sai Mandir',
@@ -13,6 +14,8 @@ export const initialClinicSettings: ClinicSettings = {
     postalCode: '560078',
     landmark: 'Opposite Adarsha Park',
   },
+  mapsEmbedUrl:
+    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.828557997931!2d77.583344!3d12.918732!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae150bf443f14b%3A0x7d6a5e12f6e4a29a!2sJayanagar%2C%20Bengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin',
   workingHours: {
     weekdays: '08:00 AM - 09:00 PM',
     saturday: '08:00 AM - 08:00 PM',
@@ -28,7 +31,7 @@ export const initialClinicSettings: ClinicSettings = {
   aboutBrief:
     'Om Sai Adarsha Clinic provides dedicated outpatient consultation, preventative health packages, diagnostic pathology, emergency stabilization, and pediatric care with an unwavering commitment to patient dignity and medical ethics.',
   announcementNotice:
-    'Seasonal flu vaccination and comprehensive preventive health checkup packages are now open for online booking.',
+    'Seasonal vaccination and comprehensive preventive health checkup appointments are open for booking.',
 };
 
 export const initialDoctors: Doctor[] = [
@@ -47,6 +50,8 @@ export const initialDoctors: Doctor[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=600&q=80',
     contactEmail: 'dr.suresh@om-sai-adarsha.clinic',
     phone: '+91 98765 43211',
+    languages: ['English', 'Kannada', 'Hindi'],
+    relatedServiceSlugs: ['general-medicine', 'ecg-cardiology-screening'],
     isAvailable: true,
     order: 1,
   },
@@ -65,6 +70,8 @@ export const initialDoctors: Doctor[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1594824813589-3543b3d368d4?auto=format&fit=crop&w=600&q=80',
     contactEmail: 'dr.ananya@om-sai-adarsha.clinic',
     phone: '+91 98765 43212',
+    languages: ['English', 'Kannada', 'Hindi'],
+    relatedServiceSlugs: ['womens-health-maternity'],
     isAvailable: true,
     order: 2,
   },
@@ -83,6 +90,8 @@ export const initialDoctors: Doctor[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=600&q=80',
     contactEmail: 'dr.rajesh@om-sai-adarsha.clinic',
     phone: '+91 98765 43213',
+    languages: ['English', 'Kannada', 'Hindi', 'Gujarati'],
+    relatedServiceSlugs: ['pediatrics-child-wellness'],
     isAvailable: true,
     order: 3,
   },
@@ -94,13 +103,15 @@ export const initialDoctors: Doctor[] = [
     department: 'Dermatology',
     qualifications: ['MBBS', 'MD (Dermatology, Venereology & Leprosy)'],
     experienceYears: 10,
-    bio: 'Recognized for advanced dermatological treatments, acne management, allergy patch tests, psoriasis therapy, and non-invasive skin rejuvenation procedures.',
+    bio: 'Recognized for clinical dermatological treatments, acne management, allergy patch tests, psoriasis therapy, and medical skin evaluations.',
     consultationFee: 650,
     availableDays: ['Tuesday', 'Thursday', 'Saturday'],
     availableTimeSlots: ['11:00 AM - 03:00 PM', '05:00 PM - 07:30 PM'],
     avatarUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=80',
     contactEmail: 'dr.meera@om-sai-adarsha.clinic',
     phone: '+91 98765 43214',
+    languages: ['English', 'Kannada', 'Tamil'],
+    relatedServiceSlugs: ['pathology-diagnostics', 'day-care-minor-surgery'],
     isAvailable: true,
     order: 4,
   },
@@ -126,6 +137,7 @@ export const initialServices: Service[] = [
     estimatedDurationMinutes: 30,
     priceStartingAt: 600,
     department: 'General Medicine',
+    relatedDoctorIds: ['doc-1'],
     isActive: true,
     order: 1,
   },
@@ -148,6 +160,7 @@ export const initialServices: Service[] = [
     estimatedDurationMinutes: 35,
     priceStartingAt: 700,
     department: 'Obstetrics & Gynecology',
+    relatedDoctorIds: ['doc-2'],
     isActive: true,
     order: 2,
   },
@@ -170,6 +183,7 @@ export const initialServices: Service[] = [
     estimatedDurationMinutes: 25,
     priceStartingAt: 500,
     department: 'Pediatrics',
+    relatedDoctorIds: ['doc-3'],
     isActive: true,
     order: 3,
   },
@@ -192,6 +206,7 @@ export const initialServices: Service[] = [
     estimatedDurationMinutes: 15,
     priceStartingAt: 350,
     department: 'Pathology',
+    relatedDoctorIds: ['doc-1', 'doc-4'],
     isActive: true,
     order: 4,
   },
@@ -214,6 +229,7 @@ export const initialServices: Service[] = [
     estimatedDurationMinutes: 20,
     priceStartingAt: 400,
     department: 'Cardiology Support',
+    relatedDoctorIds: ['doc-1'],
     isActive: true,
     order: 5,
   },
@@ -236,6 +252,7 @@ export const initialServices: Service[] = [
     estimatedDurationMinutes: 40,
     priceStartingAt: 800,
     department: 'Minor Surgery',
+    relatedDoctorIds: ['doc-1', 'doc-4'],
     isActive: true,
     order: 6,
   },
@@ -354,3 +371,6 @@ export const initialFAQs: FAQItem[] = [
     isActive: true,
   },
 ];
+
+export const initialFaqs = initialFAQs;
+export const initialGalleryItems = initialGallery;

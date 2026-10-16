@@ -3,16 +3,30 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
-import { connectToDatabase, isDatabaseConnected } from './src/db/connect';
+import {
+  connectToDatabase,
+  isDatabaseConnected,
+  checkDatabaseHealth,
+} from './src/db/mongodb';
+import {
+  getPublicDoctors,
+  getPublicDoctorBySlug,
+  getPublicServices,
+  getPublicServiceBySlug,
+  getPublicGallery,
+  getPublicFaqs,
+  getPublicTestimonials,
+  getSiteSettings,
+  createPublicEnquiry,
+  createPublicAppointment,
+  getAdminEnquiries,
+  updateEnquiryStatus,
+} from './src/db/access';
 import { AdminModel } from './src/db/models/Admin';
-import { DoctorModel } from './src/db/models/Doctor';
-import { ServiceModel } from './src/db/models/Service';
 import { AppointmentModel } from './src/db/models/Appointment';
-import { SettingModel } from './src/db/models/Setting';
-import { hashPassword, verifyPassword } from './src/lib/password';
+import { hashPassword } from './src/lib/password';
 import { signAdminToken, verifyAdminToken } from './src/lib/auth';
 import { loginSchema } from './src/validation/auth.schema';
-import { appointmentBookingSchema } from './src/validation/appointment.schema';
 
 dotenv.config();
 
@@ -50,12 +64,13 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
 
 // ----------------- API ROUTES -----------------
 
-// Health Check
+// Database & System Health Check
 app.get('/api/health', (_req: Request, res: Response) => {
+  const dbHealth = checkDatabaseHealth();
   res.json({
     status: 'ok',
     clinic: 'Om Sai Adarsha Clinic API',
-    databaseConnected: isDatabaseConnected(),
+    database: dbHealth,
     timestamp: new Date().toISOString(),
   });
 });
@@ -141,7 +156,135 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
   }
 });
 
-// Create Admin User (Protected)
+// Public Content Endpoints
+app.get('/api/doctors', async (_req: Request, res: Response) => {
+  try {
+    const doctors = await getPublicDoctors();
+    res.json({ success: true, data: doctors });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+app.get('/api/doctors/:slug', async (req: Request, res: Response) => {
+  try {
+    const doctor = await getPublicDoctorBySlug(req.params.slug);
+    if (!doctor) {
+      res.status(404).json({ success: false, error: 'Doctor not found' });
+      return;
+    }
+    res.json({ success: true, data: doctor });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+app.get('/api/services', async (_req: Request, res: Response) => {
+  try {
+    const services = await getPublicServices();
+    res.json({ success: true, data: services });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+app.get('/api/services/:slug', async (req: Request, res: Response) => {
+  try {
+    const service = await getPublicServiceBySlug(req.params.slug);
+    if (!service) {
+      res.status(404).json({ success: false, error: 'Service not found' });
+      return;
+    }
+    res.json({ success: true, data: service });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+app.get('/api/gallery', async (req: Request, res: Response) => {
+  try {
+    const category = req.query.category as string | undefined;
+    const gallery = await getPublicGallery(category);
+    res.json({ success: true, data: gallery });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+app.get('/api/faqs', async (req: Request, res: Response) => {
+  try {
+    const category = req.query.category as string | undefined;
+    const faqs = await getPublicFaqs(category);
+    res.json({ success: true, data: faqs });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+app.get('/api/testimonials', async (_req: Request, res: Response) => {
+  try {
+    const testimonials = await getPublicTestimonials();
+    res.json({ success: true, data: testimonials });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+app.get('/api/settings', async (_req: Request, res: Response) => {
+  try {
+    const settings = await getSiteSettings();
+    res.json({ success: true, data: settings });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+// Public Appointment Booking
+app.post('/api/appointments', async (req: Request, res: Response) => {
+  try {
+    const result = await createPublicAppointment(req.body);
+    res.status(201).json(result);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Booking failed';
+    res.status(400).json({ success: false, error: msg });
+  }
+});
+
+// Public General Enquiry
+app.post('/api/enquiries', async (req: Request, res: Response) => {
+  try {
+    const result = await createPublicEnquiry(req.body);
+    res.status(201).json(result);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Enquiry submission failed';
+    res.status(400).json({ success: false, error: msg });
+  }
+});
+
+// Admin Protected Routes
+app.get('/api/admin/enquiries', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const status = req.query.status as string | undefined;
+    const enquiries = await getAdminEnquiries(status);
+    res.json({ success: true, data: enquiries });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
+app.patch('/api/admin/enquiries/:id', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const updated = await updateEnquiryStatus(req.params.id, req.body);
+    if (!updated) {
+      res.status(404).json({ success: false, error: 'Enquiry not found' });
+      return;
+    }
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
+});
+
 app.post('/api/admin/users', requireAdmin, async (req: Request, res: Response) => {
   try {
     const { email, password, name, role } = req.body;
@@ -178,53 +321,14 @@ app.post('/api/admin/users', requireAdmin, async (req: Request, res: Response) =
   }
 });
 
-// Book Appointment API
-app.post('/api/appointments', async (req: Request, res: Response) => {
-  try {
-    const parseResult = appointmentBookingSchema.safeParse(req.body);
-    if (!parseResult.success) {
-      res.status(400).json({
-        success: false,
-        error: parseResult.error.issues[0]?.message || 'Validation failed',
-      });
-      return;
-    }
-
-    if (isDatabaseConnected()) {
-      const appointment = await AppointmentModel.create({
-        ...parseResult.data,
-        status: 'pending',
-      });
-      res.status(201).json({ success: true, data: appointment });
-      return;
-    }
-
-    // Response in disconnected/dev mode
-    res.status(201).json({
-      success: true,
-      data: {
-        id: `apt-${Date.now()}`,
-        ...parseResult.data,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-      },
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Booking failed';
-    res.status(500).json({ success: false, error: msg });
-  }
-});
-
 // ----------------- VITE MIDDLEWARE / SPA STATIC -----------------
 async function startServer() {
   if (process.env.NODE_ENV === 'production') {
-    // Serve production build
     app.use(express.static(path.resolve(__dirname, 'dist')));
     app.get('*', (_req: Request, res: Response) => {
       res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
     });
   } else {
-    // Dev mode with Vite middleware mounted
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',

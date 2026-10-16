@@ -17,20 +17,26 @@ interface RouterContextType {
 const RouterContext = createContext<RouterContextType | null>(null);
 
 function parseRoute(pathname: string): RouteMatch {
-  const cleanPath = pathname.replace(/\/+$/, '') || '/';
+  // Support pathname or hash-based routing (#/services/slug)
+  let raw = pathname;
+  if (typeof window !== 'undefined' && window.location.hash && window.location.hash.startsWith('#/')) {
+    raw = window.location.hash.slice(1);
+  }
+
+  const cleanPath = raw.split('?')[0].replace(/\/+$/, '') || '/';
   const params: Record<string, string> = {};
 
   // Check /services/:slug
-  const serviceMatch = cleanPath.match(/^\/services\/([a-zA-Z0-9_-]+)$/);
+  const serviceMatch = cleanPath.match(/^\/services\/([^/?#]+)$/);
   if (serviceMatch) {
-    params.slug = serviceMatch[1];
+    params.slug = decodeURIComponent(serviceMatch[1]);
     return { pathname: cleanPath, route: '/services/:slug', params, search: window.location.search };
   }
 
   // Check /doctors/:slug
-  const doctorMatch = cleanPath.match(/^\/doctors\/([a-zA-Z0-9_-]+)$/);
+  const doctorMatch = cleanPath.match(/^\/doctors\/([^/?#]+)$/);
   if (doctorMatch) {
-    params.slug = doctorMatch[1];
+    params.slug = decodeURIComponent(doctorMatch[1]);
     return { pathname: cleanPath, route: '/doctors/:slug', params, search: window.location.search };
   }
 
@@ -39,20 +45,36 @@ function parseRoute(pathname: string): RouteMatch {
 
 export const RouterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [pathname, setPathname] = useState<string>(() => {
+    if (typeof window !== 'undefined' && window.location.hash && window.location.hash.startsWith('#/')) {
+      return window.location.hash.slice(1);
+    }
     return window.location.pathname || '/';
   });
 
   useEffect(() => {
-    const handlePopState = () => {
-      setPathname(window.location.pathname || '/');
+    const handleUrlChange = () => {
+      if (window.location.hash && window.location.hash.startsWith('#/')) {
+        setPathname(window.location.hash.slice(1));
+      } else {
+        setPathname(window.location.pathname || '/');
+      }
     };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
   }, []);
 
   const navigate = (to: string) => {
     if (to === pathname) return;
-    window.history.pushState({}, '', to);
+    try {
+      window.history.pushState({}, '', to);
+    } catch {
+      window.location.hash = to;
+    }
     setPathname(to);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

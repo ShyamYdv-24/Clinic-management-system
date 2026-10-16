@@ -1,123 +1,107 @@
 import React from 'react';
-import { MapPin, Phone, Mail, Clock, ShieldCheck, Heart, Stethoscope } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, ShieldCheck, Heart, Stethoscope, ChevronRight } from 'lucide-react';
 import { Link } from '../../routes/RouterContext';
 import { useClinic } from '../../context/ClinicContext';
 
 export const Footer: React.FC = () => {
-  const { settings } = useClinic();
+  const { settings, services, doctors } = useClinic();
 
   return (
     <footer className="bg-slate-900 text-slate-300 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Col 1: Brand & Mission */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:col-span-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-sm">
-                <Stethoscope className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-sm">
+                <Stethoscope className="w-5 h-5" aria-hidden="true" />
               </div>
               <span className="font-bold text-lg text-white">Om Sai Adarsha Clinic</span>
             </div>
-            <p className="text-sm text-slate-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
               {settings.aboutBrief}
             </p>
             <div className="pt-2 flex items-center gap-2 text-xs text-emerald-400">
-              <ShieldCheck className="w-4 h-4" />
+              <ShieldCheck className="w-4 h-4" aria-hidden="true" />
               <span>Certified Healthcare & Diagnostic Center</span>
             </div>
           </div>
 
-          {/* Col 2: Quick Links */}
+          {/* Col 2: Individual Medical Services */}
           <div>
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">
-              Quick Navigation
+            <h4 className="text-white font-semibold text-xs uppercase tracking-wider mb-4">
+              Clinical Services
             </h4>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <Link href="/about" className="hover:text-emerald-400 transition-colors">About the Clinic</Link>
-              </li>
-              <li>
-                <Link href="/services" className="hover:text-emerald-400 transition-colors">Our Medical Services</Link>
-              </li>
-              <li>
-                <Link href="/doctors" className="hover:text-emerald-400 transition-colors">Consulting Specialists</Link>
-              </li>
-              <li>
-                <Link href="/gallery" className="hover:text-emerald-400 transition-colors">Facilities & Gallery</Link>
-              </li>
-              <li>
-                <Link href="/faq" className="hover:text-emerald-400 transition-colors">Patient FAQs</Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-emerald-400 transition-colors">Contact & Timings</Link>
+            <ul className="space-y-2 text-xs text-slate-400">
+              {services.map((service) => (
+                <li key={service.id}>
+                  <Link
+                    href={`/services/${service.slug}`}
+                    className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                  >
+                    <ChevronRight className="w-3 h-3 text-slate-600" aria-hidden="true" />
+                    <span>{service.title}</span>
+                  </Link>
+                </li>
+              ))}
+              <li className="pt-1">
+                <Link href="/services" className="text-emerald-400 hover:underline font-semibold">
+                  View All Services →
+                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: Consulting Hours */}
+          {/* Col 3: Consulting Doctors */}
           <div>
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">
-              Consulting Hours
+            <h4 className="text-white font-semibold text-xs uppercase tracking-wider mb-4">
+              Our Specialists
             </h4>
-            <div className="space-y-2 text-sm text-slate-400">
-              <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-white font-medium">Monday – Friday</p>
-                  <p>{settings.workingHours.weekdays}</p>
-                </div>
-              </div>
-              <div className="pt-2">
-                <p className="text-white font-medium">Saturday</p>
-                <p>{settings.workingHours.saturday}</p>
-              </div>
-              <div className="pt-2">
-                <p className="text-white font-medium">Sunday</p>
-                <p>{settings.workingHours.sunday}</p>
-              </div>
-              <div className="pt-3 border-t border-slate-800 text-xs text-emerald-400 font-medium">
-                Emergency & First Aid Desk: 24 Hours / 7 Days
-              </div>
-            </div>
+            <ul className="space-y-2 text-xs text-slate-400">
+              {doctors.map((doctor) => (
+                <li key={doctor.id}>
+                  <Link
+                    href={`/doctors/${doctor.slug}`}
+                    className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                  >
+                    <ChevronRight className="w-3 h-3 text-slate-600" aria-hidden="true" />
+                    <span>{doctor.name}</span>
+                  </Link>
+                </li>
+              ))}
+              <li className="pt-1">
+                <Link href="/doctors" className="text-emerald-400 hover:underline font-semibold">
+                  Doctor Directory →
+                </Link>
+              </li>
+            </ul>
           </div>
 
-          {/* Col 4: Contact Information */}
-          <div>
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">
-              Clinic Location & Contact
+          {/* Col 4: Timings & Location */}
+          <div className="space-y-4">
+            <h4 className="text-white font-semibold text-xs uppercase tracking-wider mb-2">
+              Hours & Emergency
             </h4>
-            <div className="space-y-3 text-sm text-slate-400">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-1" />
-                <address className="not-italic">
-                  {settings.address.street}, {settings.address.landmark && `${settings.address.landmark}, `}
-                  {settings.address.city}, {settings.address.state} - {settings.address.postalCode}
-                </address>
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <a href={`tel:${settings.generalPhone}`} className="hover:text-white transition-colors">
-                  {settings.generalPhone}
+            <div className="space-y-2 text-xs text-slate-400">
+              <p className="text-white font-medium">OPD Timings:</p>
+              <p>Mon–Fri: {settings.workingHours.weekdays}</p>
+              <p>Saturday: {settings.workingHours.saturday}</p>
+              <p className="text-emerald-400 font-semibold pt-1">
+                Emergency 24x7: <br />
+                <a href={`tel:${settings.emergencyPhone}`} className="hover:underline text-white font-bold">
+                  {settings.emergencyPhone}
                 </a>
-              </div>
+              </p>
+            </div>
 
-              <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <a href={`mailto:${settings.email}`} className="hover:text-white transition-colors">
-                  {settings.email}
-                </a>
-              </div>
-
-              <div className="pt-3">
-                <Link
-                  href="/dashboard-admin/login"
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Admin & Doctor Portal Access</span>
-                </Link>
-              </div>
+            <div className="pt-2 border-t border-slate-800 text-xs">
+              <Link
+                href="/dashboard-admin/login"
+                className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Admin & Staff CMS Login</span>
+              </Link>
             </div>
           </div>
         </div>
@@ -126,7 +110,7 @@ export const Footer: React.FC = () => {
           <p>© {new Date().getFullYear()} Om Sai Adarsha Clinic. All rights reserved.</p>
           <div className="flex items-center gap-1">
             <span>Delivering compassionate community healthcare with</span>
-            <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline" />
+            <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline" aria-hidden="true" />
           </div>
         </div>
       </div>

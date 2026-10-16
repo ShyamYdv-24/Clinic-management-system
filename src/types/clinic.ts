@@ -15,6 +15,8 @@ export interface Doctor {
   avatarUrl: string;
   contactEmail?: string;
   phone?: string;
+  languages?: string[];
+  relatedServiceSlugs?: string[];
   isAvailable: boolean;
   order: number;
 }
@@ -32,6 +34,7 @@ export interface Service {
   estimatedDurationMinutes?: number;
   priceStartingAt?: number;
   department: string;
+  relatedDoctorIds?: string[];
   isActive: boolean;
   order: number;
 }
@@ -79,6 +82,7 @@ export interface ClinicSettings {
   tagline: string;
   emergencyPhone: string;
   generalPhone: string;
+  whatsappNumber?: string;
   email: string;
   address: {
     street: string;
@@ -87,6 +91,7 @@ export interface ClinicSettings {
     postalCode: string;
     landmark?: string;
   };
+  mapsEmbedUrl?: string;
   workingHours: {
     weekdays: string;
     saturday: string;
