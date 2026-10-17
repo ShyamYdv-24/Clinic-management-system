@@ -13,13 +13,17 @@ export const Footer: React.FC = () => {
           {/* Col 1: Brand & Mission */}
           <div className="space-y-4 lg:col-span-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-sm">
-                <Stethoscope className="w-5 h-5" aria-hidden="true" />
-              </div>
-              <span className="font-bold text-lg text-white">Om Sai Adarsha Clinic</span>
+              {settings.mainLogoUrl ? (
+                <img src={settings.mainLogoUrl} alt={settings.clinicName} className="w-10 h-10 rounded-xl object-contain" />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-sm">
+                  <Stethoscope className="w-5 h-5" aria-hidden="true" />
+                </div>
+              )}
+              <span className="font-bold text-lg text-white">{settings.clinicName}</span>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
-              {settings.aboutBrief}
+              {settings.footerDescription || settings.aboutBrief}
             </p>
             <div className="pt-2 flex items-center gap-2 text-xs text-emerald-400">
               <ShieldCheck className="w-4 h-4" aria-hidden="true" />
@@ -94,6 +98,66 @@ export const Footer: React.FC = () => {
               </p>
             </div>
 
+            <div className="space-y-1 text-xs text-slate-400">
+              <p className="text-white font-medium">Clinic Address:</p>
+              <p>{settings.address.street}</p>
+              <p>{settings.address.city}, {settings.address.state} - {settings.address.postalCode}</p>
+              {settings.address.country && <p>{settings.address.country}</p>}
+            </div>
+
+            {/* Social Links (only configured valid links) */}
+            {settings.socialLinks && Object.values(settings.socialLinks).some(Boolean) && (
+              <div className="pt-2">
+                <p className="text-white font-medium text-xs mb-2">Connect With Us:</p>
+                <div className="flex items-center gap-3">
+                  {settings.socialLinks.facebook && (
+                    <a
+                      href={settings.socialLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 hover:text-white transition-colors"
+                      aria-label="Facebook"
+                    >
+                      <span className="text-xs font-semibold hover:underline">Facebook</span>
+                    </a>
+                  )}
+                  {settings.socialLinks.instagram && (
+                    <a
+                      href={settings.socialLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 hover:text-white transition-colors"
+                      aria-label="Instagram"
+                    >
+                      <span className="text-xs font-semibold hover:underline">Instagram</span>
+                    </a>
+                  )}
+                  {settings.socialLinks.youtube && (
+                    <a
+                      href={settings.socialLinks.youtube}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 hover:text-white transition-colors"
+                      aria-label="YouTube"
+                    >
+                      <span className="text-xs font-semibold hover:underline">YouTube</span>
+                    </a>
+                  )}
+                  {settings.socialLinks.linkedin && (
+                    <a
+                      href={settings.socialLinks.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 hover:text-white transition-colors"
+                      aria-label="LinkedIn"
+                    >
+                      <span className="text-xs font-semibold hover:underline">LinkedIn</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="pt-2 border-t border-slate-800 text-xs">
               <Link
                 href="/dashboard-admin/login"
@@ -107,7 +171,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} Om Sai Adarsha Clinic. All rights reserved.</p>
+          <p>{settings.footerCopyrightText || `© ${new Date().getFullYear()} ${settings.clinicName}. All rights reserved.`}</p>
           <div className="flex items-center gap-1">
             <span>Delivering compassionate community healthcare with</span>
             <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline" aria-hidden="true" />

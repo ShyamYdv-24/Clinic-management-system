@@ -22,6 +22,7 @@ import {
   ServiceInput,
   testimonialSchema,
   TestimonialInput,
+  clinicSettingsSchema,
 } from '../validation';
 import {
   initialClinicSettings,
@@ -30,7 +31,7 @@ import {
   initialFAQs,
   initialGallery,
 } from '../config/clinicData';
-import { GalleryItem, FAQItem } from '../types/clinic';
+import { GalleryItem, FAQItem, ClinicSettings } from '../types/clinic';
 
 // Safe server-side check
 function assertServerEnvironment() {
@@ -205,22 +206,54 @@ export async function getPublicTestimonials() {
   }));
 }
 
-export async function getSiteSettings() {
+let activeSettingsCache = { ...initialClinicSettings };
+
+export async function getSiteSettings(): Promise<ClinicSettings> {
   assertServerEnvironment();
   const conn = await connectToDatabase();
   if (!conn) {
-    return initialClinicSettings;
+    return activeSettingsCache;
   }
 
   const settingsDoc = await SiteSettingsModel.findOne().select('-__v').lean();
   if (!settingsDoc) {
-    return initialClinicSettings;
+    return activeSettingsCache;
   }
 
   return {
+    ...activeSettingsCache,
     ...settingsDoc,
-    id: settingsDoc._id.toString(),
+    id: (settingsDoc as any)._id?.toString(),
+  } as unknown as ClinicSettings;
+}
+
+export async function updateSiteSettings(input: unknown): Promise<ClinicSettings> {
+  assertServerEnvironment();
+  const validated = clinicSettingsSchema.parse(input);
+  const conn = await connectToDatabase();
+
+  activeSettingsCache = {
+    ...activeSettingsCache,
+    ...validated,
   };
+
+  if (!conn) {
+    return activeSettingsCache;
+  }
+
+  const updated = await SiteSettingsModel.findOneAndUpdate(
+    {},
+    { $set: validated },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  )
+    .select('-__v')
+    .lean();
+
+  return {
+    ...activeSettingsCache,
+    ...updated,
+    id: (updated as any)._id?.toString(),
+  } as unknown as ClinicSettings;
 }
 
 export async function getPublicNavigation() {
@@ -492,7 +525,7 @@ export async function upsertTestimonial(data: TestimonialInput, testimonialId?: 
     isVerified: validated.isVerified,
     isPublished: validated.isPublished,
     order: validated.order,
-    date: validated.date,
+    date: validated.date || new Date().toISOString().split('T')[0],
   };
 
   if (testimonialId) {
@@ -500,4 +533,90 @@ export async function upsertTestimonial(data: TestimonialInput, testimonialId?: 
   } else {
     return TestimonialModel.create(payload);
   }
+}
+
+export async function getAdminOverviewStats() {
+  assertServerEnvironment();
+  const conn = await connectToDatabase();
+
+  if (!conn) {
+    return {
+      databaseConnected: false,
+      totalAppointments: 0,
+      pendingAppointments: 0,
+      confirmedAppointments: 0,
+      completedAppointments: 0,
+      cancelledAppointments: 0,
+      totalEnquiries: 0,
+      unreadEnquiries: 0,
+      totalDoctors: initialDoctors.length,
+      totalServices: initialServices.length,
+      totalGallery: initialGallery.length,
+      totalFaqs: initialFAQs.length,
+      totalTestimonials: 4,
+      serverTime: new Date().toISOString(),
+    };
+  }
+
+  const [
+    totalAppointments,
+    pendingAppointments,
+    confirmedAppointments,
+    completedAppointments,
+    cancelledAppointments,
+    totalEnquiries,
+    unreadEnquiries,
+    totalDoctors,
+    totalServices,
+    totalGallery,
+    totalFaqs,
+    totalTestimonials,
+  ] = await Promise.all([
+    AppointmentModel.countDocuments(),
+    AppointmentModel.countDocuments({ status: 'pending' }),
+    AppointmentModel.countDocuments({ status: 'confirmed' }),
+    AppointmentModel.countDocuments({ status: 'completed' }),
+    AppointmentModel.countDocuments({ status: 'cancelled' }),
+    EnquiryModel.countDocuments(),
+    EnquiryModel.countDocuments({ isRead: false }),
+    DoctorModel.countDocuments(),
+    ServiceModel.countDocuments(),
+    GalleryModel.countDocuments(),
+    FAQModel.countDocuments(),
+    TestimonialModel.countDocuments(),
+  ]);
+
+  return {
+    databaseConnected: true,
+    totalAppointments,
+    pendingAppointments,
+    confirmedAppointments,
+    completedAppointments,
+    cancelledAppointments,
+    totalEnquiries,
+    unreadEnquiries,
+    totalDoctors,
+    totalServices,
+    totalGallery,
+    totalFaqs,
+    totalTestimonials,
+    serverTime: new Date().toISOString(),
+  };
+}
+
+export async function getAdminAppointments(status?: string) {
+  assertServerEnvironment();
+  const conn = await connectToDatabase();
+  if (!conn) return [];
+
+  const query: Record<string, unknown> = {};
+  if (status && status !== 'all') {
+    query.status = status;
+  }
+
+  const appointments = await AppointmentModel.find(query).sort({ createdAt: -1 }).select('-__v').lean();
+  return appointments.map((a) => ({
+    ...a,
+    id: a._id.toString(),
+  }));
 }

@@ -53,8 +53,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenBooking }) => {
               </h1>
 
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
-                Om Sai Adarsha Clinic offers dedicated outpatient specialist consultations, computerized laboratory
-                diagnostics, and 24x7 emergency first-aid triage in Bengaluru.
+                {settings.clinicName} offers dedicated outpatient specialist consultations, computerized laboratory
+                diagnostics, and 24x7 emergency first-aid triage in {settings.address.city}.
               </p>
 
               {/* CTAs */}

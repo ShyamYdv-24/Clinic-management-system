@@ -16,13 +16,13 @@ export const AboutPage: React.FC<{ onOpenBooking: () => void }> = ({ onOpenBooki
       {/* Hero / Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-          About Om Sai Adarsha Clinic
+          About {settings.clinicName}
         </span>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
           Caring for Families with Medical Dedication & Empathy
         </h1>
         <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-          Committed to delivering evidence-based outpatient consultations, accurate diagnostics, and compassionate clinical care in Bengaluru.
+          Committed to delivering evidence-based outpatient consultations, accurate diagnostics, and compassionate clinical care in {settings.address.city}.
         </p>
       </div>
 
@@ -31,7 +31,7 @@ export const AboutPage: React.FC<{ onOpenBooking: () => void }> = ({ onOpenBooki
         <div className="lg:col-span-7 space-y-5">
           <h2 className="text-2xl font-bold text-slate-900">Our Clinical Mission & Purpose</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            Om Sai Adarsha Clinic was founded to provide transparent, accessible, and high-standard outpatient medical care. We focus on direct physician-patient communication, ensuring each individual receives sufficient consultation time, thorough evaluation, and tailored clinical guidance.
+            {settings.clinicName} was founded to provide transparent, accessible, and high-standard outpatient medical care. We focus on direct physician-patient communication, ensuring each individual receives sufficient consultation time, thorough evaluation, and tailored clinical guidance.
           </p>
           <p className="text-sm text-slate-600 leading-relaxed">
             Our multi-disciplinary team brings together qualified practitioners across General Medicine, Diabetology, Obstetrics & Gynecology, Pediatrics, and Dermatology. In addition, our on-site automated diagnostic facilities allow patients to undergo necessary tests with rapid report generation.

@@ -73,7 +73,7 @@ export const ContactPage: React.FC = () => {
         {/* Contact Info Cards */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-emerald-900 text-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
-            <h2 className="text-xl font-bold">Om Sai Adarsha Clinic</h2>
+            <h2 className="text-xl font-bold">{settings.clinicName}</h2>
 
             <div className="space-y-5 text-sm text-emerald-100">
               <div className="flex items-start gap-3">

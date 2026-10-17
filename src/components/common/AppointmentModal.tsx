@@ -16,7 +16,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
   preselectedDoctorId,
   preselectedServiceTitle,
 }) => {
-  const { doctors, bookAppointment } = useClinic();
+  const { doctors, bookAppointment, settings } = useClinic();
 
   const [doctorId, setDoctorId] = useState(preselectedDoctorId || doctors[0]?.id || '');
   const [patientName, setPatientName] = useState('');
@@ -306,6 +306,19 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900"
                 />
               </div>
+
+              {settings.appointmentDisclaimer && (
+                <p className="text-[11px] text-slate-500 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                  {settings.appointmentDisclaimer}
+                </p>
+              )}
+
+              {settings.consentText && (
+                <label className="flex items-start gap-2 text-[11px] text-slate-600 cursor-pointer">
+                  <input type="checkbox" defaultChecked required className="w-3.5 h-3.5 text-emerald-600 rounded mt-0.5" />
+                  <span>{settings.consentText}</span>
+                </label>
+              )}
 
               <div className="pt-2">
                 <button

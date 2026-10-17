@@ -1,8 +1,23 @@
 import { Doctor, Service, FAQItem, GalleryItem, ClinicSettings } from '../types/clinic';
 
 export const initialClinicSettings: ClinicSettings = {
+  // 1. Clinic Identity
   clinicName: 'Om Sai Adarsha Clinic',
   tagline: 'Compassionate Care, Advanced Medical Excellence',
+  mainLogoUrl: '',
+  lightLogoUrl: '',
+  darkLogoUrl: '',
+  faviconUrl: '/favicon.ico',
+  defaultOgImage: '/og-image.jpg',
+  brandPrimaryColor: '#059669',
+  brandSecondaryColor: '#0f172a',
+  aboutBrief:
+    'Om Sai Adarsha Clinic provides dedicated outpatient consultation, preventative health packages, diagnostic pathology, emergency stabilization, and pediatric care with an unwavering commitment to patient dignity and medical ethics.',
+  establishedYear: 2012,
+  registrationNumber: 'REG/MED/KA/2012/9941',
+  directorName: 'Dr. Suresh Kumar M.D.',
+
+  // 2. Contact Information
   emergencyPhone: '+91 98765 43210',
   generalPhone: '+91 80 2345 6789',
   whatsappNumber: '+91 98765 43210',
@@ -12,26 +27,94 @@ export const initialClinicSettings: ClinicSettings = {
     city: 'Bengaluru',
     state: 'Karnataka',
     postalCode: '560078',
+    country: 'India',
     landmark: 'Opposite Adarsha Park',
   },
   mapsEmbedUrl:
     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.828557997931!2d77.583344!3d12.918732!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae150bf443f14b%3A0x7d6a5e12f6e4a29a!2sJayanagar%2C%20Bengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin',
+  googleMapsUrl: 'https://maps.google.com/?q=12.918732,77.583344',
+  coordinates: {
+    lat: 12.918732,
+    lng: 77.583344,
+  },
+  clickToCallEnabled: true,
+  whatsappCtaEnabled: true,
+
+  // 3. Opening Hours
   workingHours: {
     weekdays: '08:00 AM - 09:00 PM',
     saturday: '08:00 AM - 08:00 PM',
     sunday: '09:00 AM - 02:00 PM',
     emergency24x7: true,
   },
+  dailySchedule: {
+    monday: { open: '08:00', close: '21:00', isClosed: false },
+    tuesday: { open: '08:00', close: '21:00', isClosed: false },
+    wednesday: { open: '08:00', close: '21:00', isClosed: false },
+    thursday: { open: '08:00', close: '21:00', isClosed: false },
+    friday: { open: '08:00', close: '21:00', isClosed: false },
+    saturday: { open: '08:00', close: '20:00', isClosed: false },
+    sunday: { open: '09:00', close: '14:00', isClosed: false },
+  },
+  holidayNotices: 'Emergency department and 24x7 triage remain operational on all public holidays.',
+  displayPreferences: 'detailed',
+  timezone: 'Asia/Kolkata',
+
+  // 4. Social Profiles
   socialLinks: {
     facebook: 'https://facebook.com/om-sai-adarsha-clinic',
     instagram: 'https://instagram.com/om-sai-adarsha-clinic',
     twitter: 'https://twitter.com/omsaiclinic',
-    youtube: 'https://youtube.com',
+    youtube: 'https://youtube.com/@om-sai-adarsha-clinic',
+    linkedin: 'https://linkedin.com/company/om-sai-adarsha-clinic',
   },
-  aboutBrief:
-    'Om Sai Adarsha Clinic provides dedicated outpatient consultation, preventative health packages, diagnostic pathology, emergency stabilization, and pediatric care with an unwavering commitment to patient dignity and medical ethics.',
+
+  // 5. Website & SEO
+  productionUrl: 'https://om-sai-adarsha.clinic',
+  metaTitle: 'Om Sai Adarsha Clinic — Comprehensive Healthcare & Diagnostics',
+  metaDescription:
+    'Om Sai Adarsha Clinic offers expert doctor consultations, automated pathology lab tests, and 24x7 emergency medical assistance in Bengaluru.',
+  ogImage: '/og-image.jpg',
+  searchConsoleVerification: 'google-site-verification-om-sai-clinic-2026',
+  analyticsId: 'G-OMSAI2026',
+  cookieConsentEnabled: true,
+  structuredData: {
+    clinicType: 'MedicalClinic',
+    priceRange: '₹₹',
+    medicalSpecialty: 'General Practice, Diabetology, Cardiology, Pediatrics',
+  },
+
+  // 6. Header and Footer
+  headerLogoStyle: 'text_and_icon',
+  navLinks: [
+    { id: 'nav-1', label: 'Home', href: '/', isVisible: true, order: 1 },
+    { id: 'nav-2', label: 'About', href: '/about', isVisible: true, order: 2 },
+    { id: 'nav-3', label: 'Services', href: '/services', isVisible: true, order: 3 },
+    { id: 'nav-4', label: 'Doctors', href: '/doctors', isVisible: true, order: 4 },
+    { id: 'nav-5', label: 'Gallery', href: '/gallery', isVisible: true, order: 5 },
+    { id: 'nav-6', label: 'FAQ', href: '/faq', isVisible: true, order: 6 },
+    { id: 'nav-7', label: 'Contact', href: '/contact', isVisible: true, order: 7 },
+  ],
+  footerDescription:
+    'Dedicated outpatient consultation, preventative health packages, diagnostic pathology, emergency stabilization, and pediatric care with an unwavering commitment to patient dignity and medical ethics.',
+  footerCopyrightText: '© 2026 Om Sai Adarsha Clinic. All rights reserved.',
+  appointmentCtaLabel: 'Book Appointment',
+  whatsappCtaLabel: 'WhatsApp Us',
   announcementNotice:
     'Seasonal vaccination and comprehensive preventive health checkup appointments are open for booking.',
+
+  // 7. Appointment Configuration
+  appointmentWhatsAppNumber: '+91 98765 43210',
+  whatsappTemplate:
+    'Hello Om Sai Adarsha Clinic, I would like to book a consultation for {patientName} for {service} on {date}.',
+  requireSymptoms: true,
+  requireAge: false,
+  requireGender: false,
+  appointmentDisclaimer:
+    'Appointments booked online are subject to doctor emergency availability. Please arrive 15 minutes before your time slot.',
+  consentText:
+    'I agree to the clinic privacy policy and consent to receiving appointment updates via SMS and WhatsApp.',
+  enquiryNotificationEmail: 'reception@om-sai-adarsha.clinic',
 };
 
 export const initialDoctors: Doctor[] = [

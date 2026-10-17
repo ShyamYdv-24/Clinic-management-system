@@ -27,7 +27,10 @@ import { ContactPage } from './pages/ContactPage';
 // Admin Pages
 import { AdminLoginPage } from './pages/admin/AdminLoginPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
+import { AdminAppointmentsPage } from './pages/admin/AdminAppointmentsPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
+import { AdminPendingModulePage } from './pages/admin/AdminPendingModulePage';
+import { NotificationProvider } from './context/NotificationContext';
 
 function AppRoutes() {
   const { match, pathname, isAdminRoute } = useRouter();
@@ -51,8 +54,9 @@ function AppRoutes() {
 
     if (isLoading) {
       return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-sm">
-          Checking Admin Credentials...
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white text-xs gap-3 font-mono">
+          <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <span>Verifying Administrator Session...</span>
         </div>
       );
     }
@@ -61,12 +65,34 @@ function AppRoutes() {
       return <AdminLoginPage />;
     }
 
-    if (pathname === '/dashboard-admin/settings') {
-      return <AdminSettingsPage />;
+    switch (pathname) {
+      case '/dashboard-admin':
+        return <AdminDashboardPage />;
+      case '/dashboard-admin/appointments':
+        return <AdminAppointmentsPage />;
+      case '/dashboard-admin/pages':
+        return <AdminPendingModulePage moduleKey="pages" />;
+      case '/dashboard-admin/doctors':
+        return <AdminPendingModulePage moduleKey="doctors" />;
+      case '/dashboard-admin/services':
+        return <AdminPendingModulePage moduleKey="services" />;
+      case '/dashboard-admin/gallery':
+        return <AdminPendingModulePage moduleKey="gallery" />;
+      case '/dashboard-admin/faqs':
+        return <AdminPendingModulePage moduleKey="faqs" />;
+      case '/dashboard-admin/testimonials':
+        return <AdminPendingModulePage moduleKey="testimonials" />;
+      case '/dashboard-admin/navigation':
+        return <AdminPendingModulePage moduleKey="navigation" />;
+      case '/dashboard-admin/media':
+        return <AdminPendingModulePage moduleKey="media" />;
+      case '/dashboard-admin/seo':
+        return <AdminPendingModulePage moduleKey="seo" />;
+      case '/dashboard-admin/settings':
+        return <AdminSettingsPage />;
+      default:
+        return <AdminDashboardPage />;
     }
-
-    // Default dashboard overview
-    return <AdminDashboardPage />;
   }
 
   // Public Layout & Page Routing
@@ -128,7 +154,9 @@ export default function App() {
     <RouterProvider>
       <AuthProvider>
         <ClinicProvider>
-          <AppRoutes />
+          <NotificationProvider>
+            <AppRoutes />
+          </NotificationProvider>
         </ClinicProvider>
       </AuthProvider>
     </RouterProvider>

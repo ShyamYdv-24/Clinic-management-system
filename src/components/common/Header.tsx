@@ -112,14 +112,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBooking }) => {
             href="/"
             className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 rounded-xl p-1"
           >
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform motion-reduce:transition-none">
-              <Stethoscope className="w-6 h-6" aria-hidden="true" />
-            </div>
+            {settings.mainLogoUrl ? (
+              <img
+                src={settings.mainLogoUrl}
+                alt={settings.clinicName}
+                className="w-11 h-11 rounded-xl object-contain shadow-md"
+              />
+            ) : (
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform motion-reduce:transition-none">
+                <Stethoscope className="w-6 h-6" aria-hidden="true" />
+              </div>
+            )}
             <div>
               <div className="font-extrabold text-xl tracking-tight text-slate-900 group-hover:text-emerald-700 transition-colors">
-                Om Sai Adarsha <span className="text-emerald-600 font-semibold">Clinic</span>
+                {settings.clinicName}
               </div>
-              <p className="text-xs text-slate-500 font-medium">Healthcare with Devotion & Science</p>
+              <p className="text-xs text-slate-500 font-medium">{settings.tagline}</p>
             </div>
           </Link>
 
@@ -310,7 +318,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBooking }) => {
               className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 motion-reduce:active:scale-100 text-white font-medium text-sm px-4 py-2.5 rounded-xl shadow-xs shadow-emerald-600/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
             >
               <Calendar className="w-4 h-4" aria-hidden="true" />
-              <span>Book Appointment</span>
+              <span>{settings.appointmentCtaLabel || 'Book Appointment'}</span>
             </button>
           </div>
 
@@ -461,7 +469,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenBooking }) => {
               className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
             >
               <Calendar className="w-4 h-4" aria-hidden="true" />
-              <span>Book Appointment</span>
+              <span>{settings.appointmentCtaLabel || 'Book Appointment'}</span>
             </button>
             <Link
               href={isAuthenticated ? '/dashboard-admin' : '/dashboard-admin/login'}

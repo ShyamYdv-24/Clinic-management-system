@@ -36,3 +36,5 @@ export async function verifyPassword(plainTextPassword: string, hashedPassword: 
     return false;
   }
 }
+
+export const comparePassword = verifyPassword;

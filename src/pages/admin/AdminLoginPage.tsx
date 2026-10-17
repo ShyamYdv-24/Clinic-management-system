@@ -8,8 +8,9 @@ export const AdminLoginPage: React.FC = () => {
   const { login } = useAuth();
   const { navigate } = useRouter();
 
-  const [email, setEmail] = useState('admin@om-sai-adarsha.clinic');
   const [password, setPassword] = useState('OmSaiClinic@2026');
+  const [email, setEmail] = useState('');
+  const [showAdvancedEmail, setShowAdvancedEmail] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -17,50 +18,51 @@ export const AdminLoginPage: React.FC = () => {
     e.preventDefault();
     setErrorMsg(null);
 
-    const validation = loginSchema.safeParse({ email, password });
+    const payload = showAdvancedEmail && email ? { email, password } : { password };
+    const validation = loginSchema.safeParse(payload);
     if (!validation.success) {
-      setErrorMsg(validation.error.issues[0]?.message || 'Invalid input credentials');
+      setErrorMsg(validation.error.issues[0]?.message || 'Invalid credentials');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // In full-stack mode, call /api/auth/login; here we verify against backend endpoint with graceful fallback
       let loggedIn = false;
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify(payload),
         });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.token && data.user) {
-            login(data.user.email, data.token, data.user);
-            loggedIn = true;
-          }
+
+        const data = await res.json();
+        if (res.ok && data.token && data.user) {
+          login(data.user.email, data.token, data.user);
+          loggedIn = true;
+        } else if (res.status === 429) {
+          setErrorMsg(data.error || 'Too many attempts. Please try again later.');
+          setIsSubmitting(false);
+          return;
+        } else if (!res.ok) {
+          setErrorMsg(data.error || 'Invalid administrator password');
         }
-      } catch (err) {
-        // Fallback for dev / client preview if backend server is still initializing
+      } catch {
+        // Fallback for isolated preview mode
       }
 
-      if (!loggedIn) {
-        // Mock fallback check for local evaluation
-        if (
-          (email === 'admin@om-sai-adarsha.clinic' || email.includes('admin')) &&
-          password.length >= 6
-        ) {
-          login(email, 'mock-jwt-token-' + Date.now(), {
+      if (!loggedIn && !errorMsg) {
+        if (password === 'OmSaiClinic@2026') {
+          login('admin@om-sai-adarsha.clinic', 'mock-jwt-token-' + Date.now(), {
             id: 'admin-1',
-            email,
-            name: 'Om Sai Clinic Administrator',
+            email: 'admin@om-sai-adarsha.clinic',
+            name: 'Clinic Administrator',
             role: 'superadmin',
             isActive: true,
             createdAt: new Date().toISOString(),
           });
           loggedIn = true;
         } else {
-          setErrorMsg('Invalid email or password. Please verify your credentials.');
+          setErrorMsg('Invalid administrator credentials');
         }
       }
 
@@ -68,7 +70,7 @@ export const AdminLoginPage: React.FC = () => {
         navigate('/dashboard-admin');
       }
     } catch {
-      setErrorMsg('An unexpected authentication error occurred. Please try again.');
+      setErrorMsg('Authentication error. Please verify credentials.');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,14 +91,14 @@ export const AdminLoginPage: React.FC = () => {
           <Stethoscope className="w-6 h-6" />
         </div>
         <h2 className="text-2xl font-extrabold text-white">Om Sai Adarsha Clinic</h2>
-        <p className="text-xs text-slate-400">Restricted Administration & CMS Portal</p>
+        <p className="text-xs text-slate-400">Clinic Owner & Administration Portal</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10 border border-slate-100">
           <div className="mb-6 pb-4 border-b border-slate-100 flex items-center gap-2 text-xs font-semibold text-emerald-800 bg-emerald-50 p-2.5 rounded-lg">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Secure Admin Authentication (bcrypt hashed)</span>
+            <span>Clinic Owner Authentication</span>
           </div>
 
           {errorMsg && (
@@ -108,31 +110,47 @@ export const AdminLoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Admin Email</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900"
-                />
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-700">Administrator Password</label>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
               <div className="relative">
                 <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
                 <input
                   type="password"
                   required
+                  autoFocus
+                  placeholder="Enter administrator password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900"
                 />
               </div>
+            </div>
+
+            {showAdvancedEmail && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Admin Email (Optional Override)</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    type="email"
+                    placeholder="admin@om-sai-adarsha.clinic"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => setShowAdvancedEmail(!showAdvancedEmail)}
+                className="text-[11px] text-slate-500 hover:text-emerald-600 transition-colors cursor-pointer"
+              >
+                {showAdvancedEmail ? 'Hide email field' : 'Use specific email address'}
+              </button>
             </div>
 
             <div className="pt-2">
@@ -141,14 +159,14 @@ export const AdminLoginPage: React.FC = () => {
                 disabled={isSubmitting}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg text-sm transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
               >
-                {isSubmitting ? 'Authenticating...' : 'Sign In to Dashboard'}
+                {isSubmitting ? 'Authenticating...' : 'Unlock Clinic Dashboard'}
               </button>
             </div>
           </form>
 
           <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 text-center">
-            Default credentials for testing: <br />
-            <code className="text-slate-600">admin@om-sai-adarsha.clinic / OmSaiClinic@2026</code>
+            Configured Owner Password for testing: <br />
+            <code className="text-slate-700 font-mono bg-slate-100 px-2 py-0.5 rounded">OmSaiClinic@2026</code>
           </div>
         </div>
       </div>

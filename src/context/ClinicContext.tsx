@@ -22,7 +22,7 @@ interface ClinicContextType {
   appointments: Appointment[];
   gallery: GalleryItem[];
   faqs: FAQItem[];
-  updateSettings: (newSettings: Partial<ClinicSettings>) => void;
+  updateSettings: (newSettings: Partial<ClinicSettings>) => Promise<ClinicSettings>;
   addDoctor: (doctor: Omit<Doctor, 'id'>) => void;
   updateDoctor: (id: string, doctor: Partial<Doctor>) => void;
   deleteDoctor: (id: string) => void;
@@ -136,12 +136,56 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem('om_sai_gallery', JSON.stringify(gallery));
   }, [gallery]);
 
+  // Initial fetch from backend to ensure synchronization with MongoDB
   useEffect(() => {
-    localStorage.setItem('om_sai_faqs', JSON.stringify(faqs));
-  }, [faqs]);
+    let isMounted = true;
+    fetch('/api/settings')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (isMounted && json && json.success && json.data) {
+          setSettings((prev) => ({ ...prev, ...json.data }));
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not fetch server settings, using cached values:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  const updateSettings = (newSettings: Partial<ClinicSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }));
+  const updateSettings = async (newSettings: Partial<ClinicSettings>): Promise<ClinicSettings> => {
+    const merged = { ...settings, ...newSettings };
+    setSettings(merged);
+    localStorage.setItem('om_sai_settings', JSON.stringify(merged));
+
+    try {
+      const token = sessionStorage.getItem('adminToken');
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(merged),
+      });
+
+      if (!res.ok) {
+        const errorJson = await res.json().catch(() => ({}));
+        throw new Error(errorJson.error || `Server responded with ${res.status}`);
+      }
+
+      const json = await res.json();
+      if (json.data) {
+        setSettings(json.data);
+        localStorage.setItem('om_sai_settings', JSON.stringify(json.data));
+        return json.data;
+      }
+    } catch (err) {
+      console.warn('Server settings update warning:', err);
+      // Even if network fails, local state is preserved
+    }
+    return merged;
   };
 
   const addDoctor = (doctorData: Omit<Doctor, 'id'>) => {
