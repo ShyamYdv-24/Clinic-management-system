@@ -37,6 +37,7 @@ interface ClinicContextType {
   addFAQ: (faq: Omit<FAQItem, 'id'>) => void;
   updateFAQ: (id: string, faq: Partial<FAQItem>) => void;
   deleteFAQ: (id: string) => void;
+  refreshContent: () => Promise<void>;
 }
 
 const ClinicContext = createContext<ClinicContextType | null>(null);
@@ -136,21 +137,45 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem('om_sai_gallery', JSON.stringify(gallery));
   }, [gallery]);
 
+  const fetchAllContent = async () => {
+    try {
+      const [settingsRes, docsRes, servicesRes, galleryRes, faqsRes] = await Promise.all([
+        fetch('/api/settings').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+        fetch('/api/doctors').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+        fetch('/api/services').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+        fetch('/api/gallery').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+        fetch('/api/faqs').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      ]);
+
+      if (settingsRes?.success && settingsRes.data) {
+        setSettings((prev) => ({ ...prev, ...settingsRes.data }));
+      }
+      if (docsRes?.success && Array.isArray(docsRes.data) && docsRes.data.length > 0) {
+        setDoctors(docsRes.data);
+      }
+      if (servicesRes?.success && Array.isArray(servicesRes.data) && servicesRes.data.length > 0) {
+        setServices(servicesRes.data);
+      }
+      if (galleryRes?.success && Array.isArray(galleryRes.data) && galleryRes.data.length > 0) {
+        setGallery(galleryRes.data);
+      }
+      if (faqsRes?.success && Array.isArray(faqsRes.data) && faqsRes.data.length > 0) {
+        setFaqs(faqsRes.data);
+      }
+    } catch (err) {
+      console.warn('Could not sync content from server, using local fallback:', err);
+    }
+  };
+
   // Initial fetch from backend to ensure synchronization with MongoDB
   useEffect(() => {
-    let isMounted = true;
-    fetch('/api/settings')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => {
-        if (isMounted && json && json.success && json.data) {
-          setSettings((prev) => ({ ...prev, ...json.data }));
-        }
-      })
-      .catch((err) => {
-        console.warn('Could not fetch server settings, using cached values:', err);
-      });
+    fetchAllContent();
+    const handleFocus = () => {
+      fetchAllContent();
+    };
+    window.addEventListener('focus', handleFocus);
     return () => {
-      isMounted = false;
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
@@ -304,6 +329,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         addFAQ,
         updateFAQ,
         deleteFAQ,
+        refreshContent: fetchAllContent,
       }}
     >
       {children}

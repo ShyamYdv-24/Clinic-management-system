@@ -29,7 +29,17 @@ import { AdminLoginPage } from './pages/admin/AdminLoginPage';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { AdminAppointmentsPage } from './pages/admin/AdminAppointmentsPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
+import { AdminDoctorsPage } from './pages/admin/AdminDoctorsPage';
+import { AdminServicesPage } from './pages/admin/AdminServicesPage';
+import { AdminGalleryPage } from './pages/admin/AdminGalleryPage';
+import { AdminFaqsPage } from './pages/admin/AdminFaqsPage';
+import { AdminPagesPage } from './pages/admin/AdminPagesPage';
+import { AdminNavigationPage } from './pages/admin/AdminNavigationPage';
+import { AdminTestimonialsPage } from './pages/admin/AdminTestimonialsPage';
+import { AdminMediaPage } from './pages/admin/AdminMediaPage';
+import { AdminSeoPage } from './pages/admin/AdminSeoPage';
 import { AdminPendingModulePage } from './pages/admin/AdminPendingModulePage';
+import { SEOHead } from './components/common/SEOHead';
 import { NotificationProvider } from './context/NotificationContext';
 
 function AppRoutes() {
@@ -71,23 +81,23 @@ function AppRoutes() {
       case '/dashboard-admin/appointments':
         return <AdminAppointmentsPage />;
       case '/dashboard-admin/pages':
-        return <AdminPendingModulePage moduleKey="pages" />;
+        return <AdminPagesPage />;
       case '/dashboard-admin/doctors':
-        return <AdminPendingModulePage moduleKey="doctors" />;
+        return <AdminDoctorsPage />;
       case '/dashboard-admin/services':
-        return <AdminPendingModulePage moduleKey="services" />;
+        return <AdminServicesPage />;
       case '/dashboard-admin/gallery':
-        return <AdminPendingModulePage moduleKey="gallery" />;
+        return <AdminGalleryPage />;
       case '/dashboard-admin/faqs':
-        return <AdminPendingModulePage moduleKey="faqs" />;
+        return <AdminFaqsPage />;
       case '/dashboard-admin/testimonials':
-        return <AdminPendingModulePage moduleKey="testimonials" />;
+        return <AdminTestimonialsPage />;
       case '/dashboard-admin/navigation':
-        return <AdminPendingModulePage moduleKey="navigation" />;
+        return <AdminNavigationPage />;
       case '/dashboard-admin/media':
-        return <AdminPendingModulePage moduleKey="media" />;
+        return <AdminMediaPage />;
       case '/dashboard-admin/seo':
-        return <AdminPendingModulePage moduleKey="seo" />;
+        return <AdminSeoPage />;
       case '/dashboard-admin/settings':
         return <AdminSettingsPage />;
       default:
@@ -133,6 +143,7 @@ function AppRoutes() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-800 font-sans selection:bg-emerald-500 selection:text-white">
+      <SEOHead canonicalPath={pathname} />
       <Header onOpenBooking={() => handleOpenBooking()} />
       <main className="flex-1">{pageContent}</main>
       <Footer />

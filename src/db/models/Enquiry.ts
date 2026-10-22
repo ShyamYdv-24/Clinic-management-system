@@ -1,67 +1,114 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type EnquiryStatus = 'new' | 'in_progress' | 'responded' | 'resolved' | 'archived';
+export type EnquiryStatus = 'new' | 'contacted' | 'confirmed' | 'closed';
+
+export interface IEnquiryHistoryItem {
+  status: EnquiryStatus;
+  note?: string;
+  timestamp: Date;
+  updatedBy: string;
+}
 
 export interface IEnquiryDocument extends Document {
-  name: string;
-  email: string;
-  phone: string;
-  subject: string;
-  message: string;
-  department?: string;
-  preferredContactMethod: 'phone' | 'email' | 'whatsapp';
+  referenceNumber: string;
+  patientName: string;
+  patientPhone: string;
+  preferredDate: string;
+  preferredTimeSlot: string;
+  doctorId?: string;
+  doctorName?: string;
+  serviceId?: string;
+  serviceTitle?: string;
+  message?: string;
+  consentGiven: boolean;
+  consentTimestamp: Date;
   status: EnquiryStatus;
   isRead: boolean;
-  assignedAdminId?: mongoose.Types.ObjectId;
   internalNotes?: string;
-  responseSentAt?: Date;
+  history: IEnquiryHistoryItem[];
   ipAddress?: string;
+  whatsappUrl?: string;
+  source: 'appointment_modal' | 'contact_form' | 'direct';
   createdAt: Date;
   updatedAt: Date;
 }
 
+const EnquiryHistorySchema = new Schema<IEnquiryHistoryItem>(
+  {
+    status: {
+      type: String,
+      enum: ['new', 'contacted', 'confirmed', 'closed'],
+      required: true,
+    },
+    note: { type: String, trim: true },
+    timestamp: { type: Date, default: Date.now },
+    updatedBy: { type: String, default: 'System' },
+  },
+  { _id: false }
+);
+
 const EnquirySchema = new Schema<IEnquiryDocument>(
   {
-    name: {
+    referenceNumber: {
       type: String,
-      required: [true, 'Patient or visitor name is required'],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, 'Valid email address is required'],
-      lowercase: true,
+      required: true,
+      unique: true,
       trim: true,
       index: true,
     },
-    phone: {
+    patientName: {
       type: String,
-      required: [true, 'Phone number is required'],
+      required: [true, 'Patient name is required'],
       trim: true,
       index: true,
     },
-    subject: {
+    patientPhone: {
       type: String,
-      required: [true, 'Subject is required'],
+      required: [true, 'Patient phone number is required'],
+      trim: true,
+      index: true,
+    },
+    preferredDate: {
+      type: String,
+      required: [true, 'Preferred appointment date is required'],
+      index: true,
+    },
+    preferredTimeSlot: {
+      type: String,
+      required: [true, 'Preferred consultation slot is required'],
+    },
+    doctorId: {
+      type: String,
+      trim: true,
+    },
+    doctorName: {
+      type: String,
+      trim: true,
+    },
+    serviceId: {
+      type: String,
+      trim: true,
+    },
+    serviceTitle: {
+      type: String,
       trim: true,
     },
     message: {
       type: String,
-      required: [true, 'Enquiry message is required'],
       trim: true,
     },
-    department: {
-      type: String,
-      trim: true,
+    consentGiven: {
+      type: Boolean,
+      required: true,
+      default: true,
     },
-    preferredContactMethod: {
-      type: String,
-      enum: ['phone', 'email', 'whatsapp'],
-      default: 'phone',
+    consentTimestamp: {
+      type: Date,
+      default: Date.now,
     },
     status: {
       type: String,
-      enum: ['new', 'in_progress', 'responded', 'resolved', 'archived'],
+      enum: ['new', 'contacted', 'confirmed', 'closed'],
       default: 'new',
       index: true,
     },
@@ -70,20 +117,25 @@ const EnquirySchema = new Schema<IEnquiryDocument>(
       default: false,
       index: true,
     },
-    assignedAdminId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Admin',
-    },
     internalNotes: {
       type: String,
       trim: true,
     },
-    responseSentAt: {
-      type: Date,
+    history: {
+      type: [EnquiryHistorySchema],
+      default: [],
     },
     ipAddress: {
       type: String,
       trim: true,
+    },
+    whatsappUrl: {
+      type: String,
+    },
+    source: {
+      type: String,
+      enum: ['appointment_modal', 'contact_form', 'direct'],
+      default: 'appointment_modal',
     },
   },
   {
@@ -91,9 +143,17 @@ const EnquirySchema = new Schema<IEnquiryDocument>(
   }
 );
 
-// Search and filtering indexes
+// High performance compound indexes for filtering and search
 EnquirySchema.index({ status: 1, createdAt: -1 });
-EnquirySchema.index({ name: 'text', subject: 'text', message: 'text', email: 'text' });
+EnquirySchema.index({ preferredDate: 1, status: 1 });
+EnquirySchema.index({ patientPhone: 1, createdAt: -1 });
+EnquirySchema.index({
+  referenceNumber: 'text',
+  patientName: 'text',
+  patientPhone: 'text',
+  doctorName: 'text',
+  serviceTitle: 'text',
+});
 
 export const EnquiryModel: Model<IEnquiryDocument> =
   mongoose.models.Enquiry || mongoose.model<IEnquiryDocument>('Enquiry', EnquirySchema);

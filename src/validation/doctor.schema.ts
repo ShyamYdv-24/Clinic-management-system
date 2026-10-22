@@ -11,11 +11,13 @@ export const doctorSchema = z.object({
   consultationFee: z.number().min(0, 'Consultation fee must be non-negative'),
   availableDays: z.array(z.string()).min(1, 'Select at least one day'),
   availableTimeSlots: z.array(z.string()).min(1, 'Select at least one time slot'),
-  avatarUrl: z.string().url('Valid image URL required'),
+  avatarUrl: z.string().min(1, 'Doctor image URL is required'),
   contactEmail: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   languages: z.array(z.string()).default([]),
+  relatedServiceIds: z.array(z.string()).default([]),
   isAvailable: z.boolean().default(true),
+  isPublished: z.boolean().default(true),
   order: z.number().int().default(0),
 });
 

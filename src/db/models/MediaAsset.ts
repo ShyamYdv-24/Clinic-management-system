@@ -1,6 +1,15 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type MediaCategory = 'doctors' | 'services' | 'facilities' | 'banners' | 'general' | 'documents';
+export type MediaCategory =
+  | 'logos'
+  | 'doctors'
+  | 'services'
+  | 'gallery'
+  | 'facilities'
+  | 'banners'
+  | 'social'
+  | 'general'
+  | 'documents';
 
 export interface IMediaAssetDocument extends Document {
   title: string;
@@ -61,7 +70,7 @@ const MediaAssetSchema = new Schema<IMediaAssetDocument>(
     },
     category: {
       type: String,
-      enum: ['doctors', 'services', 'facilities', 'banners', 'general', 'documents'],
+      enum: ['logos', 'doctors', 'services', 'gallery', 'facilities', 'banners', 'social', 'general', 'documents'],
       default: 'general',
       index: true,
     },

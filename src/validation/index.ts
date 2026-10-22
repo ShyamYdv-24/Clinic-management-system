@@ -9,3 +9,5 @@ export * from './testimonial.schema';
 export * from './navigation.schema';
 export * from './media.schema';
 export * from './page.schema';
+export * from './gallery.schema';
+export * from './faq.schema';
