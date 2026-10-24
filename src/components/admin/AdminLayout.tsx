@@ -56,10 +56,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const [globalSearch, setGlobalSearch] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
-  // Close mobile drawer on route change
+  // Close mobile drawer on route change & enforce private noindex metadata
   useEffect(() => {
     setMobileDrawerOpen(false);
-  }, [pathname]);
+    document.title = `${title} | Admin Portal — Om Sai Adarsha Clinic`;
+
+    let robotsMeta = document.querySelector('meta[name="robots"]');
+    if (!robotsMeta) {
+      robotsMeta = document.createElement('meta');
+      robotsMeta.setAttribute('name', 'robots');
+      document.head.appendChild(robotsMeta);
+    }
+    robotsMeta.setAttribute('content', 'noindex, nofollow');
+  }, [pathname, title]);
 
   // Handle keyboard shortcut for search (Ctrl+K / Cmd+K) and Escape
   useEffect(() => {

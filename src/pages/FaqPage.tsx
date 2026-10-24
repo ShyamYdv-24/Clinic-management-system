@@ -4,6 +4,7 @@ import { useClinic } from '../context/ClinicContext';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { EmptyState } from '../components/common/EmptyState';
 import { Button } from '../components/common/Button';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const FaqPage: React.FC<{ onOpenBooking: () => void }> = ({ onOpenBooking }) => {
   const { faqs, settings } = useClinic();
@@ -33,6 +34,14 @@ export const FaqPage: React.FC<{ onOpenBooking: () => void }> = ({ onOpenBooking
 
   return (
     <div className="py-10 space-y-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SEOHead
+        title="Patient FAQs & Helpful Clinical Guidance"
+        description={`Frequently asked questions regarding doctor appointment booking, diagnostic blood test reports, accepted insurance, and OPD visiting hours at ${settings.clinicName}.`}
+        canonicalPath="/faq"
+        faqSchema={{
+          items: faqs.map((f) => ({ question: f.question, answer: f.answer })),
+        }}
+      />
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: 'Patient FAQs' }]} />
 

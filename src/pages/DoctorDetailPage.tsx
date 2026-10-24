@@ -18,6 +18,7 @@ import { Link, useRouter } from '../routes/RouterContext';
 import { formatINR } from '../lib/utils';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { Button } from '../components/common/Button';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const DoctorDetailPage: React.FC<{ onOpenBooking: (doctorId?: string) => void }> = ({
   onOpenBooking,
@@ -28,22 +29,15 @@ export const DoctorDetailPage: React.FC<{ onOpenBooking: (doctorId?: string) => 
   const slug = match.params.slug;
   const doctor = doctors.find((d) => d.slug === slug);
 
-  // Dynamic document title
-  useEffect(() => {
-    if (doctor) {
-      document.title = `${doctor.name} — ${doctor.specialty} | Om Sai Adarsha Clinic`;
-    } else {
-      document.title = 'Doctor Profile Not Found | Om Sai Adarsha Clinic';
-    }
-    return () => {
-      document.title = 'Om Sai Adarsha Clinic';
-    };
-  }, [doctor]);
-
   // Handle missing doctor
   if (!doctor) {
     return (
       <div className="py-20 max-w-xl mx-auto px-4 text-center space-y-5">
+        <SEOHead
+          title="Doctor Profile Not Found"
+          description="The requested physician profile could not be found in our medical specialist directory."
+          canonicalPath={`/doctors/${slug}`}
+        />
         <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
           <Stethoscope className="w-8 h-8" aria-hidden="true" />
         </div>
@@ -79,6 +73,21 @@ export const DoctorDetailPage: React.FC<{ onOpenBooking: (doctorId?: string) => 
 
   return (
     <div className="py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <SEOHead
+        title={`${doctor.name} — ${doctor.specialty}`}
+        description={`Consult with ${doctor.name}, ${doctor.qualifications.join(', ')} with ${doctor.experienceYears}+ years of clinical experience in ${doctor.specialty} at ${settings.clinicName}, Bengaluru.`}
+        ogImage={doctor.avatarUrl}
+        canonicalPath={`/doctors/${doctor.slug}`}
+        type="profile"
+        doctorSchema={{
+          name: doctor.name,
+          specialty: doctor.specialty,
+          qualifications: doctor.qualifications,
+          bio: doctor.bio,
+          image: doctor.avatarUrl,
+        }}
+      />
+
       {/* Breadcrumbs */}
       <Breadcrumbs
         items={[

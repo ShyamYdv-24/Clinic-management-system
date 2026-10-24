@@ -6,11 +6,12 @@ import { formatINR } from '../lib/utils';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { EmptyState } from '../components/common/EmptyState';
 import { Button } from '../components/common/Button';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const ServicesPage: React.FC<{ onOpenBooking: (doctorId?: string, serviceTitle?: string) => void }> = ({
   onOpenBooking,
 }) => {
-  const { services } = useClinic();
+  const { services, settings } = useClinic();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -27,6 +28,11 @@ export const ServicesPage: React.FC<{ onOpenBooking: (doctorId?: string, service
 
   return (
     <div className="py-10 space-y-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SEOHead
+        title="Clinical Services & Diagnostic Treatments"
+        description={`Explore comprehensive healthcare treatments, computerized pathology lab tests, pediatric consultations, and cardiac evaluations at ${settings.clinicName}.`}
+        canonicalPath="/services"
+      />
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: 'Medical Services' }]} />
 

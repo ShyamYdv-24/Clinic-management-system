@@ -91,6 +91,24 @@ const cliHost = hostFlagIndex !== -1 && args[hostFlagIndex + 1] ? args[hostFlagI
 const PORT = cliPort || (process.env.PORT && process.env.PORT !== '8080' ? Number(process.env.PORT) : 3000);
 const HOST = cliHost;
 const app = express();
+app.disable('x-powered-by');
+
+// Security & Caching Headers Middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
+
+  // Static uploads caching vs Admin API no-cache
+  if (req.path.startsWith('/uploads/')) {
+    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+  } else if (req.path.startsWith('/api/admin/') || req.path.startsWith('/api/auth/')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+  }
+  next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
@@ -615,10 +633,66 @@ app.get('/robots.txt', async (_req: Request, res: Response) => {
   }
 });
 
-// Public Appointment Booking
+// Rate limiting map for public forms (enquiries and appointments)
+interface SubmissionRateLimit {
+  count: number;
+  resetAt: number;
+}
+const publicSubmissionsMap = new Map<string, SubmissionRateLimit>();
+
+function checkPublicSubmissionRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const limit = publicSubmissionsMap.get(ip);
+  if (!limit || limit.resetAt < now) {
+    publicSubmissionsMap.set(ip, { count: 1, resetAt: now + 10 * 60 * 1000 }); // 10 min window
+    return true;
+  }
+  if (limit.count >= 30) {
+    return false; // Exceeded 30 submissions per 10 minutes
+  }
+  limit.count += 1;
+  return true;
+}
+
+// Simple HTML/XSS sanitizer for raw text inputs
+function sanitizeInputString(str?: string): string {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .replace(/<[^>]*>?/gm, '') // Strip HTML tags
+    .replace(/[^\w\s.,?!@+\-–—()/'":#]/gi, '') // Strip potential script payloads / control chars
+    .trim();
+}
+
+// Public Appointment Booking (with rate limiting and sanitization)
 app.post('/api/appointments', async (req: Request, res: Response) => {
+  const clientIp =
+    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+    req.socket.remoteAddress ||
+    '127.0.0.1';
+
+  if (!checkPublicSubmissionRateLimit(clientIp)) {
+    res.status(429).json({
+      success: false,
+      error: 'Too many appointment requests from this connection. Please wait a few minutes before submitting again or call reception directly.',
+    });
+    return;
+  }
+
+  // Anti-bot honeypot check
+  if (req.body.honeypot || req.body.hp_website) {
+    res.status(200).json({ success: true, message: 'Request received' });
+    return;
+  }
+
   try {
-    const result = await createPublicAppointment(req.body);
+    const sanitizedBody = {
+      ...req.body,
+      patientName: sanitizeInputString(req.body.patientName),
+      patientPhone: sanitizeInputString(req.body.patientPhone),
+      symptoms: sanitizeInputString(req.body.symptoms || req.body.message),
+      message: sanitizeInputString(req.body.message || req.body.symptoms),
+    };
+    const result = await createPublicAppointment(sanitizedBody);
     res.status(201).json(result);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Booking failed';
@@ -626,10 +700,35 @@ app.post('/api/appointments', async (req: Request, res: Response) => {
   }
 });
 
-// Public General Enquiry
+// Public General Enquiry (with rate limiting and sanitization)
 app.post('/api/enquiries', async (req: Request, res: Response) => {
+  const clientIp =
+    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+    req.socket.remoteAddress ||
+    '127.0.0.1';
+
+  if (!checkPublicSubmissionRateLimit(clientIp)) {
+    res.status(429).json({
+      success: false,
+      error: 'Too many inquiries submitted from this connection. Please wait a few minutes before submitting again.',
+    });
+    return;
+  }
+
+  if (req.body.honeypot || req.body.hp_website) {
+    res.status(200).json({ success: true, message: 'Inquiry received' });
+    return;
+  }
+
   try {
-    const result = await createPublicEnquiry(req.body);
+    const sanitizedBody = {
+      ...req.body,
+      patientName: sanitizeInputString(req.body.patientName || req.body.name),
+      patientPhone: sanitizeInputString(req.body.patientPhone || req.body.phone),
+      email: sanitizeInputString(req.body.email),
+      message: sanitizeInputString(req.body.message),
+    };
+    const result = await createPublicEnquiry(sanitizedBody);
     res.status(201).json(result);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Enquiry submission failed';

@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Camera, Eye, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const GalleryPage: React.FC = () => {
-  const { gallery } = useClinic();
+  const { gallery, settings } = useClinic();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -54,6 +55,11 @@ export const GalleryPage: React.FC = () => {
 
   return (
     <div className="py-10 space-y-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SEOHead
+        title="Clinic Infrastructure & Facilities Gallery"
+        description={`Take a visual walkthrough of ${settings.clinicName}'s sterilized consultation chambers, digital pathology laboratory, and comfortable reception waiting spaces.`}
+        canonicalPath="/gallery"
+      />
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: 'Clinic Gallery' }]} />
 

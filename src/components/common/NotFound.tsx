@@ -2,10 +2,16 @@ import React from 'react';
 import { Stethoscope, ArrowLeft } from 'lucide-react';
 import { Link } from '../../routes/RouterContext';
 import { Button } from './Button';
+import { SEOHead } from './SEOHead';
 
 export const NotFoundPage: React.FC = () => {
   return (
     <div className="py-24 max-w-xl mx-auto px-4 text-center space-y-6">
+      <SEOHead
+        title="Page Not Found (404)"
+        description="The requested page could not be found on the Om Sai Adarsha Clinic website. Please return to the homepage or browse our doctor specialties."
+        canonicalPath="/404"
+      />
       <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100">
         <Stethoscope className="w-8 h-8" aria-hidden="true" />
       </div>

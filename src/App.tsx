@@ -143,9 +143,17 @@ function AppRoutes() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-800 font-sans selection:bg-emerald-500 selection:text-white">
-      <SEOHead canonicalPath={pathname} />
+      {/* Accessible Skip Link for Keyboard & Screen Reader Users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-emerald-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-xl focus:shadow-xl focus:text-xs focus:font-bold focus:outline-none focus:ring-2 focus:ring-white transition-all"
+      >
+        Skip to main content
+      </a>
       <Header onOpenBooking={() => handleOpenBooking()} />
-      <main className="flex-1">{pageContent}</main>
+      <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
+        {pageContent}
+      </main>
       <Footer />
 
       <FloatingWhatsApp />

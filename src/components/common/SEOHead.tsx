@@ -76,6 +76,9 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     setMetaTag('name', 'twitter:description', metaDescription);
     setMetaTag('name', 'twitter:image', shareImage);
 
+    // Robots directive for public indexable pages
+    setMetaTag('name', 'robots', 'index, follow');
+
     // Google Search Console verification token if configured
     if (settings.searchConsoleVerification) {
       setMetaTag('name', 'google-site-verification', settings.searchConsoleVerification);

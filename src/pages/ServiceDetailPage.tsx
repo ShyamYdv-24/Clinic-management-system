@@ -16,6 +16,7 @@ import { Link, useRouter } from '../routes/RouterContext';
 import { formatINR } from '../lib/utils';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { Button } from '../components/common/Button';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const ServiceDetailPage: React.FC<{
   onOpenBooking: (doctorId?: string, serviceTitle?: string) => void;
@@ -26,22 +27,15 @@ export const ServiceDetailPage: React.FC<{
   const slug = match.params.slug;
   const service = services.find((s) => s.slug === slug);
 
-  // Dynamic document title
-  useEffect(() => {
-    if (service) {
-      document.title = `${service.title} | Om Sai Adarsha Clinic`;
-    } else {
-      document.title = 'Service Not Found | Om Sai Adarsha Clinic';
-    }
-    return () => {
-      document.title = 'Om Sai Adarsha Clinic';
-    };
-  }, [service]);
-
   // Handle missing services with a proper not-found response
   if (!service) {
     return (
       <div className="py-20 max-w-xl mx-auto px-4 text-center space-y-5">
+        <SEOHead
+          title="Medical Service Not Found"
+          description="The requested healthcare service or diagnostic test could not be located in our clinical catalog."
+          canonicalPath={`/services/${slug}`}
+        />
         <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
           <Stethoscope className="w-8 h-8" aria-hidden="true" />
         </div>
@@ -85,6 +79,20 @@ export const ServiceDetailPage: React.FC<{
 
   return (
     <div className="py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <SEOHead
+        title={`${service.title} — ${service.department}`}
+        description={`${service.summary} Consult specialist physicians at ${settings.clinicName}, Bengaluru. Consultations starting at ₹${service.priceStartingAt || 300}.`}
+        ogImage={service.imageUrl}
+        canonicalPath={`/services/${service.slug}`}
+        type="article"
+        serviceSchema={{
+          name: service.title,
+          description: service.description,
+          department: service.department,
+          price: service.priceStartingAt,
+        }}
+      />
+
       {/* Breadcrumbs */}
       <Breadcrumbs
         items={[

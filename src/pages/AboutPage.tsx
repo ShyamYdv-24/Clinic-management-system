@@ -4,12 +4,18 @@ import { useClinic } from '../context/ClinicContext';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { Button } from '../components/common/Button';
 import { Link } from '../routes/RouterContext';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const AboutPage: React.FC<{ onOpenBooking: () => void }> = ({ onOpenBooking }) => {
   const { settings, doctors } = useClinic();
 
   return (
     <div className="py-10 space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SEOHead
+        title="About Our Clinic & Medical Mission"
+        description={`Learn about ${settings.clinicName}'s clinical philosophy, sterilized consultation chambers, experienced physicians, and preventive health mission in ${settings.address.city}.`}
+        canonicalPath="/about"
+      />
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: 'About the Clinic' }]} />
 

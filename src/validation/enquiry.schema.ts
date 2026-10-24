@@ -23,12 +23,14 @@ export const appointmentEnquirySchema = z.object({
     .string()
     .min(1, 'Preferred appointment date is required')
     .refine((val) => {
-      // Must be today or future date
-      const date = new Date(val);
-      if (isNaN(date.getTime())) return false;
+      // Must be today or future date in local timezone
+      const parts = val.split('-').map(Number);
+      if (parts.length !== 3 || parts.some(isNaN)) return false;
+      const [year, month, day] = parts;
+      const inputDate = new Date(year, month - 1, day);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      return date >= today;
+      return inputDate >= today;
     }, 'Preferred date cannot be in the past'),
   preferredTimeSlot: z
     .string()
@@ -45,13 +47,14 @@ export const appointmentEnquirySchema = z.object({
     .optional()
     .default(''),
   consentGiven: z.literal(true, {
-    errorMap: () => ({
-      message: 'You must provide consent for clinic communication regarding this appointment',
-    }),
+    message: 'You must provide consent for clinic communication regarding this appointment',
   }),
   honeypot: z.string().max(0, 'Spam detected').optional().default(''),
   submitTimestamp: z.number().optional(),
 });
+
+export const enquiryCreateSchema = appointmentEnquirySchema;
+export type EnquiryCreateInput = z.infer<typeof enquiryCreateSchema>;
 
 export const updateEnquiryStatusSchema = z.object({
   status: enquiryStatusEnum.optional(),

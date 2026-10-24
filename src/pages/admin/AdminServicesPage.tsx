@@ -143,6 +143,20 @@ export const AdminServicesPage: React.FC = () => {
     fetchServicesAndDoctors();
   }, []);
 
+  // Keyboard accessibility for modal and drawer dismissal
+  useEffect(() => {
+    if (!isFormOpen && !previewService && !deletingService) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isFormOpen) setIsFormOpen(false);
+        if (previewService) setPreviewService(null);
+        if (deletingService) setDeletingService(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFormOpen, previewService, deletingService]);
+
   // Auto-slug generation from title
   const handleTitleChange = (title: string) => {
     const slug = title
@@ -585,11 +599,16 @@ export const AdminServicesPage: React.FC = () => {
 
       {/* CREATE / EDIT SERVICE MODAL */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="service-form-modal-title"
+        >
           <div className="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 id="service-form-modal-title" className="text-base font-bold text-slate-900">
                   {editingService ? `Edit: ${editingService.title}` : 'Add Clinical Service'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -599,9 +618,10 @@ export const AdminServicesPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsFormOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                aria-label="Close service form dialog"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 

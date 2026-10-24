@@ -21,6 +21,7 @@ import { useClinic } from '../context/ClinicContext';
 import { Link } from '../routes/RouterContext';
 import { formatINR } from '../lib/utils';
 import { Button } from '../components/common/Button';
+import { SEOHead } from '../components/common/SEOHead';
 
 interface HomePageProps {
   onOpenBooking: (doctorId?: string, serviceTitle?: string) => void;
@@ -36,6 +37,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenBooking }) => {
 
   return (
     <div className="space-y-16 lg:space-y-24 pb-16">
+      <SEOHead
+        title="Comprehensive Healthcare & Diagnostics"
+        description="Compassionate patient-centered outpatient medical care, qualified physician consultations, computerized pathology tests, and 24x7 emergency response in Bengaluru."
+        canonicalPath="/"
+      />
       {/* 1. Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-emerald-50/70 via-white to-slate-50 pt-10 pb-16 lg:pt-16 lg:pb-24 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

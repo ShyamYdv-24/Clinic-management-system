@@ -14,6 +14,7 @@ import {
 import { useClinic } from '../context/ClinicContext';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { Button } from '../components/common/Button';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const ContactPage: React.FC = () => {
   const { settings } = useClinic();
@@ -21,13 +22,21 @@ export const ContactPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submissionReference, setSubmissionReference] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+
+    // Bot trap: ignore submission if honeypot is filled
+    if (honeypot.trim()) {
+      setSubmitted(true);
+      return;
+    }
 
     if (!name.trim() || !email.trim() || !message.trim()) {
       setFormError('Please fill in your name, email, and message.');
@@ -40,19 +49,47 @@ export const ContactPage: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const res = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientName: name.trim(),
+          email: email.trim(),
+          patientPhone: phone.trim() || '9876543210',
+          message: message.trim(),
+          serviceTitle: 'General Clinic Inquiry',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit enquiry. Please try again or call reception.');
+      }
+
+      setSubmissionReference(data.reference || null);
       setSubmitted(true);
-    }, 600);
+    } catch (err) {
+      setFormError((err as Error).message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const cleanPhone = (settings.whatsappNumber || settings.generalPhone || '').replace(/[^\d]/g, '');
   const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-    'Hello Om Sai Adarsha Clinic, I am writing to inquire about clinical consultations and diagnostic services.'
+    `Hello Om Sai Adarsha Clinic, I am writing to follow up on my inquiry${
+      submissionReference ? ` (Ref: ${submissionReference})` : ''
+    }.`
   )}`;
 
   return (
     <div className="py-10 space-y-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SEOHead
+        title="Contact Us & Clinic Location"
+        description={`Reach ${settings.clinicName} at ${settings.address.street}, ${settings.address.city}. 24/7 emergency telephone: ${settings.emergencyPhone}. Wheelchair accessible with on-site parking.`}
+        canonicalPath="/contact"
+      />
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: 'Contact Us & Location' }]} />
 
@@ -166,15 +203,44 @@ export const ContactPage: React.FC = () => {
                   <CheckCircle2 className="w-10 h-10" aria-hidden="true" />
                 </div>
                 <h3 className="text-2xl font-bold text-slate-900">Inquiry Delivered Successfully</h3>
+                {submissionReference && (
+                  <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-800 text-xs font-mono font-semibold px-3 py-1 rounded-full border border-emerald-200">
+                    <span>Reference:</span>
+                    <span>{submissionReference}</span>
+                  </div>
+                )}
                 <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                  Thank you, <strong className="text-slate-900">{name}</strong>. Your message has been received by our administrative desk. We will respond to <strong>{email}</strong> shortly.
+                  Thank you, <strong className="text-slate-900">{name}</strong>. Your inquiry has been registered in our system. A medical coordinator will review and reply to <strong>{email}</strong> shortly.
                 </p>
-                <Button variant="outline" size="sm" onClick={() => setSubmitted(false)}>
-                  Send Another Inquiry
-                </Button>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Follow up on WhatsApp</span>
+                    <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                  </a>
+                  <Button variant="outline" size="sm" onClick={() => { setSubmitted(false); setSubmissionReference(null); }}>
+                    Send Another Inquiry
+                  </Button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                {/* Honeypot field for bot suppression */}
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  className="hidden"
+                  aria-hidden="true"
+                />
+
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Send an Inquiry / General Question</h2>
                   <p className="text-xs text-slate-500 mt-1">
@@ -183,7 +249,11 @@ export const ContactPage: React.FC = () => {
                 </div>
 
                 {formError && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-700">
+                  <div
+                    role="alert"
+                    aria-live="assertive"
+                    className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-700"
+                  >
                     <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
                     <span>{formError}</span>
                   </div>

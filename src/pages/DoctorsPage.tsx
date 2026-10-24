@@ -6,9 +6,10 @@ import { formatINR } from '../lib/utils';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { EmptyState } from '../components/common/EmptyState';
 import { Button } from '../components/common/Button';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const DoctorsPage: React.FC<{ onOpenBooking: (doctorId?: string) => void }> = ({ onOpenBooking }) => {
-  const { doctors } = useClinic();
+  const { doctors, settings } = useClinic();
   const [selectedDept, setSelectedDept] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -25,6 +26,11 @@ export const DoctorsPage: React.FC<{ onOpenBooking: (doctorId?: string) => void 
 
   return (
     <div className="py-10 space-y-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SEOHead
+        title="Consulting Specialists & Doctor Roster"
+        description={`Meet qualified physician specialists at ${settings.clinicName} in General Medicine, Pediatrics, Cardiology, Orthopedics, and Gynecology. View consultation fees and OPD hours.`}
+        canonicalPath="/doctors"
+      />
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: 'Consulting Doctors' }]} />
 

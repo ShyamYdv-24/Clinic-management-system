@@ -383,7 +383,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   />
                 </div>
                 {errors.patientName && (
-                  <p id="patientName-error" className="text-[11px] text-rose-600 mt-1">
+                  <p id="patientName-error" role="alert" aria-live="polite" className="text-[11px] text-rose-600 mt-1">
                     {errors.patientName.message}
                   </p>
                 )}
@@ -409,7 +409,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   />
                 </div>
                 {errors.patientPhone && (
-                  <p id="patientPhone-error" className="text-[11px] text-rose-600 mt-1">
+                  <p id="patientPhone-error" role="alert" aria-live="polite" className="text-[11px] text-rose-600 mt-1">
                     {errors.patientPhone.message}
                   </p>
                 )}
@@ -512,7 +512,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   </span>
                 </label>
                 {errors.consentGiven && (
-                  <p className="text-[11px] text-rose-600 mt-1 ml-6">{errors.consentGiven.message}</p>
+                  <p role="alert" aria-live="polite" className="text-[11px] text-rose-600 mt-1 ml-6">{errors.consentGiven.message}</p>
                 )}
               </div>
 
